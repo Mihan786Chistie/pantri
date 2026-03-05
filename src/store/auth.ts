@@ -18,6 +18,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     isHydrated: false,
 
     setTokens: async (accessToken, refreshToken) => {
+        await SecureStore.setItemAsync('accessToken', accessToken);
         await SecureStore.setItemAsync('refreshToken', refreshToken);
         set({ accessToken, refreshToken });
     },
@@ -33,18 +34,29 @@ export const useAuthStore = create<AuthState>((set) => ({
                 });
             }
         } catch (error) {
-            console.warn("Backend signout failed, clearing local state anyway:", error);
+
         } finally {
+            await SecureStore.deleteItemAsync('accessToken');
             await SecureStore.deleteItemAsync('refreshToken');
             set({ accessToken: null, refreshToken: null });
         }
     },
 
     hydrate: async () => {
-        const refresh = await SecureStore.getItemAsync('refreshToken')
+        const [access, refresh] = await Promise.all([
+            SecureStore.getItemAsync('accessToken'),
+            SecureStore.getItemAsync('refreshToken')
+        ]);
 
         if (!refresh) {
+            set({ isHydrated: true });
+            return;
+        }
+
+        if (access) {
             set({
+                accessToken: access,
+                refreshToken: refresh,
                 isHydrated: true
             });
             return;
@@ -56,15 +68,23 @@ export const useAuthStore = create<AuthState>((set) => ({
                     Authorization: `Bearer ${refresh}`
                 }
             })
-            await SecureStore.setItemAsync("refreshToken", res.data.refreshToken)
+            const { accessToken: newAccess, refreshToken: newRefresh } = res.data;
+
+            await Promise.all([
+                SecureStore.setItemAsync("accessToken", newAccess),
+                SecureStore.setItemAsync("refreshToken", newRefresh)
+            ]);
 
             set({
-                accessToken: res.data.accessToken,
-                refreshToken: res.data.refreshToken,
+                accessToken: newAccess,
+                refreshToken: newRefresh,
                 isHydrated: true,
             })
         } catch {
-            await SecureStore.deleteItemAsync("refreshToken")
+            await Promise.all([
+                SecureStore.deleteItemAsync("accessToken"),
+                SecureStore.deleteItemAsync("refreshToken")
+            ]);
             set({ accessToken: null, refreshToken: null, isHydrated: true })
         }
     }
