@@ -4,7 +4,8 @@ import { Tabs } from 'expo-router';
 
 import { Colors } from '@/constants/Colors';
 
-export default function Layout() {
+export default function TabsLayout() {
+
     return (
         <Tabs screenOptions={{
             tabBarActiveTintColor: Colors.primary,
@@ -34,3 +35,4 @@ export default function Layout() {
         </Tabs>
     );
 }
+
