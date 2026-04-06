@@ -1,6 +1,3 @@
-/**
- * Below are the colors that are used in the app.
- */
 export const Colors = {
     primary: '#0f761eff',
     background: '#fff',

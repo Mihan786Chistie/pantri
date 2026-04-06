@@ -1,23 +1,8 @@
-// model/schema.js
 import { appSchema, tableSchema } from '@nozbe/watermelondb'
 
 export default appSchema({
     version: 1,
     tables: [
-        // ─── Users ────────────────────────────────────────────────────────────────
-        tableSchema({
-            name: 'users',
-            columns: [
-                { name: 'name', type: 'string' },
-                { name: 'email', type: 'string' },
-                { name: 'password', type: 'string' },
-                { name: 'hashed_refresh_token', type: 'string', isOptional: true },
-                { name: 'avatar_url', type: 'string', isOptional: true },
-                { name: 'created_at', type: 'number' },
-            ],
-        }),
-
-        // ─── Items ────────────────────────────────────────────────────────────────
         tableSchema({
             name: 'items',
             columns: [
@@ -29,7 +14,6 @@ export default appSchema({
             ],
         }),
 
-        // ─── Meal Times ───────────────────────────────────────────────────────────
         tableSchema({
             name: 'meal_times',
             columns: [
@@ -45,7 +29,6 @@ export default appSchema({
             ],
         }),
 
-        // ─── AI Notifications ─────────────────────────────────────────────────────
         tableSchema({
             name: 'ai_notifications',
             columns: [

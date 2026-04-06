@@ -8,7 +8,6 @@ import schema from './schema'
 import AiNotification from './model/AiNotification'
 import Item from './model/Item'
 import MealTime from './model/MealTime'
-import User from './model/User'
 
 // First, create the adapter to the underlying database:
 const adapter = new SQLiteAdapter({
@@ -26,7 +25,6 @@ const adapter = new SQLiteAdapter({
 export const database = new Database({
     adapter,
     modelClasses: [
-        User,
         Item,
         MealTime,
         AiNotification

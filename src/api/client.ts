@@ -1,6 +1,6 @@
 import axios from "axios";
+import { useAuthStore } from "../features/auth/store/auth.store";
 import { AuthResponse } from "../features/auth/types";
-import { useAuthStore } from "../store/auth";
 
 let isRefreshing = false;
 let failedQueue: { resolve: (token: string | null) => void; reject: (error: any) => void }[] = [];
@@ -73,8 +73,11 @@ api.interceptors.response.use(
                 );
 
                 const { accessToken, refreshToken: newRefreshToken } = res.data;
+                const user = useAuthStore.getState().user;
 
-                await useAuthStore.getState().setTokens(accessToken, newRefreshToken);
+                if (user) {
+                    await useAuthStore.getState().setTokens(accessToken, newRefreshToken, user);
+                }
 
                 processQueue(null, accessToken);
 
