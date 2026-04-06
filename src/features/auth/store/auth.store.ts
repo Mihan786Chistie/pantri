@@ -1,6 +1,7 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { create } from "zustand";
+import { database } from '../../../db/index';
 import { AuthState } from '../types';
 
 const clearTokens = async () => {
@@ -38,6 +39,13 @@ export const useAuthStore = create<AuthState>((set) => ({
             console.error(error);
         } finally {
             await clearTokens();
+            try {
+                await database.write(async () => {
+                    await database.unsafeResetDatabase();
+                });
+            } catch (error) {
+                console.error("Failed to reset database on logout:", error);
+            }
             set({ accessToken: null, refreshToken: null, user: null });
         }
     },
@@ -74,7 +82,7 @@ export const useAuthStore = create<AuthState>((set) => ({
             })
             const { accessToken: newAccess, refreshToken: newRefresh, user: newUser } = res.data;
 
-            const userData = newUser || user;
+            const userData = user;
 
             await Promise.all([
                 SecureStore.setItemAsync("accessToken", newAccess),
