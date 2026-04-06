@@ -1,8 +1,8 @@
-import { AddButton } from '@/components/AddButton';
+import { AddButton } from '@/src/components/AddButton';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Tabs } from 'expo-router';
 
-import { Colors } from '@/constants/Colors';
+import { Colors } from '@/src/constants/colors';
 
 export default function TabsLayout() {
 

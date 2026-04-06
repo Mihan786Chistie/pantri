@@ -1,4 +1,7 @@
-import { useAuthStore } from '@/src/store/auth';
+import { database } from '@/src/db';
+import { SyncManager } from '@/src/db/sync/syncManager';
+import { useAuthStore } from '@/src/features/auth/store/auth.store';
+import { DatabaseProvider } from '@nozbe/watermelondb/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { Stack } from 'expo-router';
@@ -36,19 +39,22 @@ export default function RootLayout() {
     );
 
     return (
-        <QueryClientProvider client={queryClient}>
-            <Stack screenOptions={{ headerShown: false }}>
-                <Stack.Protected guard={!!accessToken}>
-                    <Stack.Screen name="(protected)" options={{
-                        animation: "none"
-                    }} />
-                </Stack.Protected>
-                <Stack.Protected guard={!accessToken}>
-                    <Stack.Screen name="(auth)" options={{
-                        animation: "none"
-                    }} />
-                </Stack.Protected>
-            </Stack>
-        </QueryClientProvider>
+        <DatabaseProvider database={database}>
+            <QueryClientProvider client={queryClient}>
+                <SyncManager />
+                <Stack screenOptions={{ headerShown: false }}>
+                    <Stack.Protected guard={!!accessToken}>
+                        <Stack.Screen name="(protected)" options={{
+                            animation: "none"
+                        }} />
+                    </Stack.Protected>
+                    <Stack.Protected guard={!accessToken}>
+                        <Stack.Screen name="(auth)" options={{
+                            animation: "none"
+                        }} />
+                    </Stack.Protected>
+                </Stack>
+            </QueryClientProvider>
+        </DatabaseProvider>
     );
 }

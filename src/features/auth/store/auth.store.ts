@@ -1,26 +1,28 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { create } from "zustand";
+import { database } from '../../../db/index';
+import { AuthState } from '../types';
 
-
-type AuthState = {
-    accessToken: string | null;
-    refreshToken: string | null;
-    isHydrated: boolean;
-    setTokens: (accessToken: string, refreshToken: string) => Promise<void>;
-    logout: () => Promise<void>;
-    hydrate: () => Promise<void>;
-}
+const clearTokens = async () => {
+    await Promise.all([
+        SecureStore.deleteItemAsync('accessToken'),
+        SecureStore.deleteItemAsync('refreshToken'),
+        SecureStore.deleteItemAsync('user')
+    ]);
+};
 
 export const useAuthStore = create<AuthState>((set) => ({
     accessToken: null,
     refreshToken: null,
+    user: null,
     isHydrated: false,
 
-    setTokens: async (accessToken, refreshToken) => {
+    setTokens: async (accessToken, refreshToken, user) => {
         await SecureStore.setItemAsync('accessToken', accessToken);
         await SecureStore.setItemAsync('refreshToken', refreshToken);
-        set({ accessToken, refreshToken });
+        await SecureStore.setItemAsync('user', JSON.stringify(user));
+        set({ accessToken, refreshToken, user });
     },
 
     logout: async () => {
@@ -34,19 +36,28 @@ export const useAuthStore = create<AuthState>((set) => ({
                 });
             }
         } catch (error) {
-
+            console.error(error);
         } finally {
-            await SecureStore.deleteItemAsync('accessToken');
-            await SecureStore.deleteItemAsync('refreshToken');
-            set({ accessToken: null, refreshToken: null });
+            await clearTokens();
+            try {
+                await database.write(async () => {
+                    await database.unsafeResetDatabase();
+                });
+            } catch (error) {
+                console.error("Failed to reset database on logout:", error);
+            }
+            set({ accessToken: null, refreshToken: null, user: null });
         }
     },
 
     hydrate: async () => {
-        const [access, refresh] = await Promise.all([
+        const [access, refresh, userStr] = await Promise.all([
             SecureStore.getItemAsync('accessToken'),
-            SecureStore.getItemAsync('refreshToken')
+            SecureStore.getItemAsync('refreshToken'),
+            SecureStore.getItemAsync('user')
         ]);
+
+        const user = userStr ? JSON.parse(userStr) : null;
 
         if (!refresh) {
             set({ isHydrated: true });
@@ -57,6 +68,7 @@ export const useAuthStore = create<AuthState>((set) => ({
             set({
                 accessToken: access,
                 refreshToken: refresh,
+                user,
                 isHydrated: true
             });
             return;
@@ -68,24 +80,25 @@ export const useAuthStore = create<AuthState>((set) => ({
                     Authorization: `Bearer ${refresh}`
                 }
             })
-            const { accessToken: newAccess, refreshToken: newRefresh } = res.data;
+            const { accessToken: newAccess, refreshToken: newRefresh, user: newUser } = res.data;
+
+            const userData = user;
 
             await Promise.all([
                 SecureStore.setItemAsync("accessToken", newAccess),
-                SecureStore.setItemAsync("refreshToken", newRefresh)
+                SecureStore.setItemAsync("refreshToken", newRefresh),
+                SecureStore.setItemAsync("user", JSON.stringify(userData))
             ]);
 
             set({
                 accessToken: newAccess,
                 refreshToken: newRefresh,
+                user: userData,
                 isHydrated: true,
             })
         } catch {
-            await Promise.all([
-                SecureStore.deleteItemAsync("accessToken"),
-                SecureStore.deleteItemAsync("refreshToken")
-            ]);
-            set({ accessToken: null, refreshToken: null, isHydrated: true })
+            await clearTokens();
+            set({ accessToken: null, refreshToken: null, user: null, isHydrated: true })
         }
     }
 }));
