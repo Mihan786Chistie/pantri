@@ -1,4 +1,4 @@
-import { mySync } from "@/src/db/sync/sync";
+import { syncService } from "@/src/db/sync/sync.service";
 import { useAuthStore } from "@/src/features/auth/store/auth.store";
 import React from "react";
 import { Alert, Button, StyleSheet, Text, View } from "react-native";
@@ -20,7 +20,7 @@ export default function Index() {
             <View style={styles.actionsSection}>
                 <Button title="Sync Now" onPress={async () => {
                     try {
-                        await mySync();
+                        await syncService.sync();
                         Alert.alert("Success", "Sync completed!");
                     } catch (err: any) {
                         Alert.alert("Sync Error", err.message);
