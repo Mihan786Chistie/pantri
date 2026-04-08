@@ -1,21 +1,21 @@
 import { useAuthStore } from '@/src/features/auth/store/auth.store';
 import { useEffect } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
-import { mySync } from './sync';
+import { syncService } from './sync.service';
 
 export const SyncManager = () => {
     const accessToken = useAuthStore((s) => s.accessToken);
 
     useEffect(() => {
         if (accessToken) {
-            mySync().catch(err => console.error("[SyncManager] Initial sync failed:", err));
+            syncService.sync();
         }
     }, [accessToken]);
 
     useEffect(() => {
         const handleAppStateChange = (nextAppState: AppStateStatus) => {
             if (nextAppState === 'active' && accessToken) {
-                mySync().catch(err => console.error("[SyncManager] Foreground sync failed:", err));
+                syncService.sync();
             }
         };
 
