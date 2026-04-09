@@ -52,8 +52,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "eaddd45a-6c9e-46c5-bda8-434eba37d859"
+        "projectId": "89931003-460d-4a21-bd6e-660b795bf5f3"
       }
-    }
+    },
+    "owner": "mihan2go"
   }
 }
