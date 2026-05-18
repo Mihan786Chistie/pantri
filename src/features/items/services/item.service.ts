@@ -27,6 +27,7 @@ export async function updateItem(item: Item, data: ItemUpdateType) {
             if (data.name !== undefined) record.name = data.name;
             if (data.category !== undefined) record.category = data.category;
             if (data.expiresAt !== undefined) record.expiresAt = data.expiresAt;
+            if (data.emoji !== undefined) (record as any).emoji = data.emoji;
         });
     });
 }

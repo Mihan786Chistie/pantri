@@ -11,6 +11,7 @@ export default class Item extends Model {
     @text('user_id') userId
     @text('name') name
     @text('category') category
+    @text('emoji') emoji
 
     @date('expires_at') expiresAt
 
