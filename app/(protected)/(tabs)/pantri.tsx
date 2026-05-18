@@ -1,88 +1,94 @@
 import Item from "@/src/db/model/Item";
 import { useAuthStore } from "@/src/features/auth/store/auth.store";
-import { deleteItem, updateItem } from "@/src/features/items/services/item.service";
+import { PantriTemplate } from "@/src/features/items/components/templates/PantriTemplate";
+import { deleteItem } from "@/src/features/items/services/item.service";
+import { FilterType } from "@/src/features/items/types";
+import { checkExpiry, groupByCategory } from "@/src/features/items/utils";
 import { Database, Q } from "@nozbe/watermelondb";
 import { useDatabase, withObservables } from "@nozbe/watermelondb/react";
-import React, { useCallback } from "react";
-import { Alert, Button, FlatList, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { StyleSheet, Text, View } from "react-native";
 
-interface ItemRowProps {
-    item: Item;
+interface PantriListProps {
+    items: Item[];
 }
 
-const ItemRow = ({ item }: ItemRowProps) => {
-    const handleDeleteItem = useCallback(async () => {
-        try {
-            await deleteItem(item);
-        } catch (err: any) {
-            Alert.alert("Error", err.message);
-        }
-    }, [item]);
+const PantriList = ({ items }: PantriListProps) => {
+    const [search, setSearch] = useState("");
+    const [filter, setFilter] = useState<FilterType>("all");
 
-    const handleConsumeItem = useCallback(async () => {
-        try {
-            await updateItem(item, { isConsumed: !item.isConsumed });
-        } catch (err: any) {
-            Alert.alert("Error", err.message);
-        }
-    }, [item]);
+    useEffect(() => {
+        const runCleanup = async () => {
+            const oneDayMs = 24 * 60 * 60 * 1000;
+            const now = Date.now();
 
-    return (
-        <View style={styles.itemRow}>
-            <View style={{ flex: 1 }}>
-                <Text style={styles.itemName}>{item.name}</Text>
-                <Text style={styles.itemDetail}>
-                    {item.category}
-                    {item.expiresAt
-                        ? ` · Expires: ${item.expiresAt.toLocaleDateString()}`
-                        : ""}
-                    {item.isConsumed ? " · ✅ Consumed" : ""}
-                </Text>
-            </View>
-            <Button
-                title="Delete"
-                color="red"
-                onPress={handleDeleteItem}
-            />
-            <Button
-                title="Done"
-                color="blue"
-                onPress={handleConsumeItem}
-            />
-        </View>
-    );
-};
+            for (const item of items) {
+                let shouldDelete = false;
 
-const EnhancedItemRow = withObservables(['item'], ({ item }: { item: Item }) => ({
-    item: item.observe(),
-}))(ItemRow);
-
-const PantriList = ({ items }: { items: Item[] }) => {
-    return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Your Pantri</Text>
-            <View style={styles.itemsSection}>
-                <Text style={styles.sectionTitle}>
-                    Your Items ({items.length}):
-                </Text>
-                <FlatList
-                    data={items}
-                    keyExtractor={(item) => item.id}
-                    renderItem={({ item }) => (
-                        <EnhancedItemRow item={item} />
-                    )}
-                    ListEmptyComponent={
-                        <Text style={styles.emptyText}>No items yet. Add some!</Text>
+                if (item.expiresAt) {
+                    const daysLeft = Math.ceil(
+                        (item.expiresAt.getTime() - now) / (1000 * 60 * 60 * 24)
+                    );
+                    if (daysLeft < -1) {
+                        shouldDelete = true;
                     }
-                />
-            </View>
-        </View>
+                }
+
+                const consumedAt = (item as any).consumedAt;
+                if (item.isConsumed && consumedAt) {
+                    if (now - consumedAt.getTime() > oneDayMs) {
+                        shouldDelete = true;
+                    }
+                }
+
+                if (shouldDelete) {
+                    try {
+                        await deleteItem(item);
+                        console.log(`[AutoCleanup] Automatically deleted expired/consumed item: ${item.name}`);
+                    } catch (e) {
+                        console.warn(`[AutoCleanup] Failed to delete item: ${item.name}`, e);
+                    }
+                }
+            }
+        };
+
+        if (items.length > 0) {
+            runCleanup();
+        }
+    }, [items]);
+
+    const filtered = items.filter((item) => {
+        const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase());
+        if (!matchesSearch) return false;
+
+        if (filter === "expiring") {
+            const daysLeft = checkExpiry(item);
+            return daysLeft >= 0 && daysLeft <= 3 && !item.isConsumed;
+        }
+
+        return true;
+    });
+
+    const sections = groupByCategory(filtered);
+
+    return (
+        <PantriTemplate
+            searchQuery={search}
+            onSearchQueryChange={setSearch}
+            filter={filter}
+            onFilterChange={setFilter}
+            sections={sections}
+            totalItems={items.length}
+        />
     );
 };
 
-const enhance = withObservables(['userId'], ({ database, userId }: { database: Database, userId: string }) => ({
-    items: database.get<Item>('items').query(Q.where('user_id', userId)).observe(),
-}));
+const enhance = withObservables(
+    ["userId"],
+    ({ database, userId }: { database: Database; userId: string }) => ({
+        items: database.get<Item>("items").query(Q.where("user_id", userId)).observe(),
+    })
+);
 
 const EnhancedPantriList = enhance(PantriList);
 
@@ -93,7 +99,7 @@ export default function Pantri() {
     if (!user) {
         return (
             <View style={styles.container}>
-                <Text>Please log in to see your pantri.</Text>
+                <Text style={styles.emptyText}>Please log in to see your pantri.</Text>
             </View>
         );
     }
@@ -102,18 +108,14 @@ export default function Pantri() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, padding: 50 },
-    title: { fontWeight: "bold", fontSize: 20 },
-    itemsSection: { marginTop: 30, flex: 1 },
-    sectionTitle: { marginTop: 10, fontWeight: "bold", fontSize: 16 },
-    itemRow: {
-        flexDirection: "row",
+    container: {
+        flex: 1,
+        backgroundColor: "#f5f5f3",
         alignItems: "center",
-        paddingVertical: 8,
-        borderBottomWidth: 1,
-        borderBottomColor: "#eee",
+        justifyContent: "center",
     },
-    itemName: { fontWeight: "600" },
-    itemDetail: { color: "#666", fontSize: 12 },
-    emptyText: { color: "#999", marginTop: 10 },
+    emptyText: {
+        color: "#999",
+        fontSize: 14,
+    },
 });
