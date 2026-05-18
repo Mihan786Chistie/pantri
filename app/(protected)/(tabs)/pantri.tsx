@@ -1,13 +1,13 @@
 import Item from "@/src/db/model/Item";
 import { useAuthStore } from "@/src/features/auth/store/auth.store";
 import { PantriTemplate } from "@/src/features/items/components/templates/PantriTemplate";
-import { deleteItem, updateItem } from "@/src/features/items/services/item.service";
+import { deleteItem } from "@/src/features/items/services/item.service";
 import { FilterType } from "@/src/features/items/types";
 import { checkExpiry, groupByCategory } from "@/src/features/items/utils";
 import { Database, Q } from "@nozbe/watermelondb";
 import { useDatabase, withObservables } from "@nozbe/watermelondb/react";
-import React, { useCallback, useEffect, useState } from "react";
-import { Alert, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { StyleSheet, Text, View } from "react-native";
 
 interface PantriListProps {
     items: Item[];
@@ -16,9 +16,6 @@ interface PantriListProps {
 const PantriList = ({ items }: PantriListProps) => {
     const [search, setSearch] = useState("");
     const [filter, setFilter] = useState<FilterType>("all");
-
-    const [selectedItem, setSelectedItem] = useState<Item | null>(null);
-    const [isPickerVisible, setIsPickerVisible] = useState(false);
 
     useEffect(() => {
         const runCleanup = async () => {
@@ -60,22 +57,6 @@ const PantriList = ({ items }: PantriListProps) => {
         }
     }, [items]);
 
-    const handleOpenPicker = useCallback((item: Item) => {
-        setSelectedItem(item);
-        setIsPickerVisible(true);
-    }, []);
-
-    const handleSelectEmoji = useCallback(async (emoji: string) => {
-        if (!selectedItem) return;
-        try {
-            await updateItem(selectedItem, { emoji });
-            setIsPickerVisible(false);
-            setSelectedItem(null);
-        } catch (err: any) {
-            Alert.alert("Error", err.message);
-        }
-    }, [selectedItem]);
-
     const filtered = items.filter((item) => {
         const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase());
         if (!matchesSearch) return false;
@@ -98,10 +79,6 @@ const PantriList = ({ items }: PantriListProps) => {
             onFilterChange={setFilter}
             sections={sections}
             totalItems={items.length}
-            isPickerVisible={isPickerVisible}
-            onClosePicker={() => setIsPickerVisible(false)}
-            onSelectEmoji={handleSelectEmoji}
-            onEditEmoji={handleOpenPicker}
         />
     );
 };

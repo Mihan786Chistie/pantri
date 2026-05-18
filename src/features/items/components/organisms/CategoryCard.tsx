@@ -1,4 +1,3 @@
-import Item from "@/src/db/model/Item";
 import { Section } from "@/src/features/items/types";
 import React from "react";
 import { StyleSheet, View } from "react-native";
@@ -7,10 +6,9 @@ import { EnhancedItemRow } from "./ItemRow";
 
 interface CategoryCardProps {
     section: Section;
-    onEditEmoji?: (item: Item) => void;
 }
 
-export const CategoryCard = ({ section, onEditEmoji }: CategoryCardProps) => {
+export const CategoryCard = ({ section }: CategoryCardProps) => {
     return (
         <View style={styles.categoryCard}>
             <CategoryHeader title={section.title} count={section.data.length} />
@@ -19,7 +17,7 @@ export const CategoryCard = ({ section, onEditEmoji }: CategoryCardProps) => {
                 {section.data.map((item, index) => (
                     <React.Fragment key={item.id}>
                         {index > 0 && <View style={styles.rowDivider} />}
-                        <EnhancedItemRow item={item} onEditEmoji={onEditEmoji} />
+                        <EnhancedItemRow item={item} />
                     </React.Fragment>
                 ))}
             </View>

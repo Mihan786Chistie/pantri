@@ -1,6 +1,6 @@
 import { Colors } from "@/src/constants/colors";
-import Item from "@/src/db/model/Item";
 import { FilterType, Section } from "@/src/features/items/types";
+import { usePantriUIStore } from "@/src/features/items/store/pantriUI.store";
 import React from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { FilterTab } from "../molecules/FilterTab";
@@ -15,10 +15,6 @@ interface PantriTemplateProps {
     onFilterChange: (filter: FilterType) => void;
     sections: Section[];
     totalItems: number;
-    isPickerVisible: boolean;
-    onClosePicker: () => void;
-    onSelectEmoji: (emoji: string) => void;
-    onEditEmoji: (item: Item) => void;
 }
 
 export const PantriTemplate = ({
@@ -28,11 +24,8 @@ export const PantriTemplate = ({
     onFilterChange,
     sections,
     totalItems,
-    isPickerVisible,
-    onClosePicker,
-    onSelectEmoji,
-    onEditEmoji,
 }: PantriTemplateProps) => {
+    const { isPickerVisible, closePicker, selectEmoji } = usePantriUIStore();
     const filters: FilterType[] = ["all", "expiring"];
     const filterLabels: Record<FilterType, string> = {
         all: "All items",
@@ -73,7 +66,6 @@ export const PantriTemplate = ({
                     <CategoryCard
                         key={section.title}
                         section={section}
-                        onEditEmoji={onEditEmoji}
                     />
                 ))}
                 {sections.length === 0 && (
@@ -84,8 +76,8 @@ export const PantriTemplate = ({
             {/* Slide-Up Emoji Picker Modal */}
             <EmojiPickerModal
                 isVisible={isPickerVisible}
-                onClose={onClosePicker}
-                onSelectEmoji={onSelectEmoji}
+                onClose={closePicker}
+                onSelectEmoji={selectEmoji}
             />
         </View>
     );

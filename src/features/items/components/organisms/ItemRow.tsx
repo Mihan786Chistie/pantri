@@ -1,6 +1,7 @@
 import Item from "@/src/db/model/Item";
 import { deleteItem, updateItem } from "@/src/features/items/services/item.service";
 import { ItemRowProps } from "@/src/features/items/types";
+import { usePantriUIStore } from "@/src/features/items/store/pantriUI.store";
 import getExpiryDots, { checkExpiry, findFoodEmoji } from "@/src/features/items/utils";
 import { withObservables } from "@nozbe/watermelondb/react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -9,7 +10,8 @@ import { ConsumeCheckbox } from "../atoms/ConsumeCheckbox";
 import { EmojiButton } from "../atoms/EmojiButton";
 import { ItemRowInfo } from "../molecules/ItemRowInfo";
 
-export const ItemRow = ({ item, onEditEmoji }: ItemRowProps) => {
+export const ItemRow = ({ item }: ItemRowProps) => {
+    const openPicker = usePantriUIStore((s) => s.openPicker);
     const [emoji, setEmoji] = useState(item.emoji || "📦");
     const pan = useRef(new Animated.ValueXY()).current;
 
@@ -52,12 +54,8 @@ export const ItemRow = ({ item, onEditEmoji }: ItemRowProps) => {
     }, [item, pan]);
 
     const handlePressEmoji = useCallback(() => {
-        if (onEditEmoji) {
-            onEditEmoji(item);
-        } else {
-            console.warn("[ItemRow] onEditEmoji callback is undefined!");
-        }
-    }, [item, onEditEmoji]);
+        openPicker(item);
+    }, [item, openPicker]);
 
     const panResponder = useRef(
         PanResponder.create({

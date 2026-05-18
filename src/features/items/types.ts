@@ -21,7 +21,6 @@ export type FilterType = "all" | "expiring";
 
 export interface ItemRowProps {
     item: Item;
-    onEditEmoji?: (item: Item) => void;
 }
 
 export interface Section {
