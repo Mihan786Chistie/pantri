@@ -5,6 +5,7 @@ export type ItemType = {
     category?: string;
     expiresAt: Date;
     isConsumed: boolean;
+    consumedAt?: Date;
 }
 
 export type ItemUpdateType = {
@@ -13,6 +14,7 @@ export type ItemUpdateType = {
     expiresAt?: Date;
     isConsumed?: boolean;
     emoji?: string;
+    consumedAt?: Date;
 }
 
 export type FilterType = "all" | "expiring";

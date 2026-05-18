@@ -52,7 +52,6 @@ export const ItemRow = ({ item, onEditEmoji }: ItemRowProps) => {
     }, [item, pan]);
 
     const handlePressEmoji = useCallback(() => {
-        console.log("[ItemRow] Emoji pressed for:", item.name);
         if (onEditEmoji) {
             onEditEmoji(item);
         } else {

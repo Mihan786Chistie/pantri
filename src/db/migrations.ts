@@ -13,5 +13,16 @@ export default schemaMigrations({
                 }),
             ],
         },
+        {
+            toVersion: 3,
+            steps: [
+                addColumns({
+                    table: 'items',
+                    columns: [
+                        { name: 'consumed_at', type: 'number', isOptional: true },
+                    ],
+                }),
+            ],
+        },
     ],
 })

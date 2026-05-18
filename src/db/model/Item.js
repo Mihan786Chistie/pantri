@@ -14,6 +14,7 @@ export default class Item extends Model {
     @text('emoji') emoji
 
     @date('expires_at') expiresAt
+    @date('consumed_at') consumedAt
 
     @field('is_consumed') isConsumed
 
