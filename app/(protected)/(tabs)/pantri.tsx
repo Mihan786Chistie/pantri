@@ -29,7 +29,7 @@ const PantriList = ({ items }: PantriListProps) => {
                     const daysLeft = Math.ceil(
                         (item.expiresAt.getTime() - now) / (1000 * 60 * 60 * 24)
                     );
-                    if (daysLeft < -1) {
+                    if (daysLeft < 0) {
                         shouldDelete = true;
                     }
                 }
