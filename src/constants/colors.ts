@@ -5,4 +5,10 @@ export const Colors = {
     icon: '#fff',
     tabIconDefault: '#687076',
     tabIconSelected: '#0f761eff',
+    green: "#3B6D11",
+    lightGreen: "#C0DD97",
+    orange: "#EF9F27",
+    lightOrange: "#FAC775",
+    red: "#E24B4A",
+    lightRed: "#F7C1C1",
 };

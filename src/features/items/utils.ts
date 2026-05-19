@@ -1,3 +1,4 @@
+import { Colors } from "@/src/constants/colors";
 import Item from "@/src/db/model/Item";
 import { Section } from "@/src/features/items/types";
 import data from "@emoji-mart/data";
@@ -12,8 +13,8 @@ export const POPULAR_FOOD_EMOJIS = [
     "🥕", "🍅", "🥔", "🧅", "🧄", "🌶️", "🌽", "🥚", "🧀", "🥛",
     "🧈", "🥩", "🍗", "🍖", "🥓", "🐟", "🍤", "🍞", "🥐", "🥯",
     "🥞", "🧇", "🍕", "🍔", "🌮", "🥘", "🍲", "🍚", "🌾", "🍜",
-    "🍝", "🍰", "🍩", "🍪", "🍫", "🍯", "🧂", "🫙", "🧃", "🥤",
-    "☕", "🍵", "🍺", "🍷", "📦"
+    "🍝", "🍰", "🍩", "🍪", "🍫", "🍯", "🧂", "🫙", "🧃", "☕",
+    "🍵", "🍺", "🍷", "💊", "📦"
 ];
 
 const emojiData = data as any;
@@ -35,6 +36,7 @@ export const EMOJI_OVERRIDES: Record<string, string> = {
     shrimp: "🍤",
     yogurt: "🥛",
     cream: "🥛",
+    curd: "🥛",
     butter: "🧈",
     cheese: "🧀",
     egg: "🥚",
@@ -60,18 +62,19 @@ export const EMOJI_OVERRIDES: Record<string, string> = {
     salt: "🧂",
     pepper: "🧂",
     oil: "🫙",
-    water: "💧",
     juice: "🧃",
-    soda: "🥤",
     coffee: "☕",
     tea: "🍵",
     beer: "🍺",
     wine: "🍷",
-    ice: "🧊",
     pizza: "🍕",
     burger: "🍔",
-    salad: "🥗",
     soup: "🍲",
+    pill: "💊",
+    capsule: "💊",
+    tablet: "💊",
+    drops: "💊",
+    syrup: "💊",
 };
 
 export function checkExpiry(item: Item): number {
@@ -84,7 +87,7 @@ export function checkExpiry(item: Item): number {
 
 export default function getExpiryDots(item: Item): string[] {
     if (!item.expiresAt)
-        return ["#3B6D11", "#3B6D11", "#3B6D11"];
+        return [Colors.green, Colors.green, Colors.green];
 
     const daysLeft = checkExpiry(item);
 
@@ -92,12 +95,18 @@ export default function getExpiryDots(item: Item): string[] {
         return [];
 
     if (daysLeft <= 2)
-        return ["#E24B4A", "#F7C1C1", "#F7C1C1"];
+        return [Colors.red, Colors.lightRed, Colors.lightRed];
 
     if (daysLeft <= 7)
-        return ["#EF9F27", "#EF9F27", "#FAC775"];
+        return [Colors.orange, Colors.orange, Colors.lightOrange];
 
-    return ["#3B6D11", "#3B6D11", "#3B6D11"];
+    if (daysLeft > 7 && daysLeft <= 100)
+        return [Colors.green, Colors.green, Colors.green];
+
+    if (daysLeft > 100 && (daysLeft / 2) <= 180)
+        return [Colors.green, Colors.green, Colors.green, Colors.green, Colors.lightGreen];
+
+    return [Colors.green, Colors.green, Colors.green, Colors.green, Colors.green];
 }
 
 export async function findFoodEmoji(query: string): Promise<string> {
