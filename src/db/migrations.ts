@@ -1,4 +1,4 @@
-import { schemaMigrations, addColumns } from '@nozbe/watermelondb/Schema/migrations'
+import { schemaMigrations, addColumns, createTable } from '@nozbe/watermelondb/Schema/migrations'
 
 export default schemaMigrations({
     migrations: [
@@ -20,6 +20,18 @@ export default schemaMigrations({
                     table: 'items',
                     columns: [
                         { name: 'consumed_at', type: 'number', isOptional: true },
+                    ],
+                }),
+            ],
+        },
+        {
+            toVersion: 4,
+            steps: [
+                createTable({
+                    name: 'categories',
+                    columns: [
+                        { name: 'name', type: 'string' },
+                        { name: 'user_id', type: 'string', isOptional: true, isIndexed: true },
                     ],
                 }),
             ],

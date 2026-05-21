@@ -5,6 +5,7 @@ export type ItemType = {
     category?: string;
     expiresAt: Date;
     isConsumed: boolean;
+    emoji?: string;
     consumedAt?: Date;
 }
 
