@@ -17,6 +17,19 @@ export const POPULAR_FOOD_EMOJIS = [
     "🍵", "🍺", "🍷", "💊", "📦"
 ];
 
+export const DEFAULT_CATEGORIES = [
+    "Dairy",
+    "Fruits",
+    "Vegetables",
+    "Grains",
+    "Proteins",
+    "Snacks",
+    "Drinks",
+    "Condiments",
+    "Oils",
+    "Other",
+];
+
 const emojiData = data as any;
 const foodsCategory = emojiData.categories.find((c: any) => c.id === "foods");
 const foodEmojiIds = new Set(foodsCategory ? foodsCategory.emojis : []);

@@ -1,7 +1,7 @@
 import { appSchema, tableSchema } from '@nozbe/watermelondb'
 
 export default appSchema({
-    version: 3,
+    version: 4,
     tables: [
         tableSchema({
             name: 'items',
@@ -38,6 +38,14 @@ export default appSchema({
                 { name: 'notifications', type: 'string', isOptional: true },
                 { name: 'created_at', type: 'number' },
                 { name: 'updated_at', type: 'number' },
+            ],
+        }),
+
+        tableSchema({
+            name: 'categories',
+            columns: [
+                { name: 'name', type: 'string' },
+                { name: 'user_id', type: 'string', isOptional: true, isIndexed: true },
             ],
         }),
     ],
