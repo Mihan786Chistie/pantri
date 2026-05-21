@@ -1,7 +1,7 @@
 import { Colors } from "@/src/constants/colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
-import { Pressable, StyleSheet, ViewStyle, StyleProp } from "react-native";
+import { Pressable, StyleProp, StyleSheet, ViewStyle } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 
 interface AddButtonProps {
@@ -69,9 +69,9 @@ export const AddButton = ({
 const styles = StyleSheet.create({
     container: {
         position: 'absolute',
-        top: '50%',
+        bottom: 10,
         left: '50%',
-        transform: [{ translateX: -28 }, { translateY: -28 }],
+        transform: [{ translateX: -28 }],
         width: 56,
         height: 56,
         alignItems: 'center',
