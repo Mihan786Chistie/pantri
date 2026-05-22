@@ -7,6 +7,7 @@ import { FilterTab } from "../molecules/FilterTab";
 import { SearchBar } from "../molecules/SearchBar";
 import { CategoryCard } from "../organisms/CategoryCard";
 import { EmojiPickerModal } from "../organisms/EmojiPickerModal";
+import { EmptyStateIllustration } from "../molecules/EmptyStateIllustration";
 
 interface PantriTemplateProps {
     searchQuery: string;
@@ -34,32 +35,38 @@ export const PantriTemplate = ({
 
     return (
         <View style={styles.container}>
-            <View style={styles.header}>
-                <View style={styles.headerTitleRow}>
-                    <Text style={styles.title}>Your Pantri</Text>
-                    <View style={styles.badgeContainer}>
-                        <Text style={styles.badgeText}>{totalItems} items</Text>
+            {totalItems > 0 && (
+                <View style={styles.header}>
+                    <View style={styles.headerTitleRow}>
+                        <Text style={styles.title}>Your Pantri</Text>
+                        <View style={styles.badgeContainer}>
+                            <Text style={styles.badgeText}>{totalItems} items</Text>
+                        </View>
                     </View>
                 </View>
-            </View>
+            )}
 
-            <SearchBar value={searchQuery} onChangeText={onSearchQueryChange} />
+            {totalItems > 0 && (
+                <>
+                    <SearchBar value={searchQuery} onChangeText={onSearchQueryChange} />
 
-            {/* Filters */}
-            <View style={styles.filterRow}>
-                {filters.map((f) => (
-                    <FilterTab
-                        key={f}
-                        isActive={filter === f}
-                        label={filterLabels[f]}
-                        onPress={() => onFilterChange(f)}
-                    />
-                ))}
-            </View>
+                    {/* Filters */}
+                    <View style={styles.filterRow}>
+                        {filters.map((f) => (
+                            <FilterTab
+                                key={f}
+                                isActive={filter === f}
+                                label={filterLabels[f]}
+                                onPress={() => onFilterChange(f)}
+                            />
+                        ))}
+                    </View>
+                </>
+            )}
 
             {/* Scrollable Category List */}
             <ScrollView
-                contentContainerStyle={{ paddingBottom: 48 }}
+                contentContainerStyle={{ paddingBottom: 48, flexGrow: 1 }}
                 showsVerticalScrollIndicator={false}
             >
                 {sections.map((section) => (
@@ -68,7 +75,10 @@ export const PantriTemplate = ({
                         section={section}
                     />
                 ))}
-                {sections.length === 0 && (
+                {totalItems === 0 && (
+                    <EmptyStateIllustration />
+                )}
+                {totalItems > 0 && sections.length === 0 && (
                     <Text style={styles.emptyText}>No items found.</Text>
                 )}
             </ScrollView>
