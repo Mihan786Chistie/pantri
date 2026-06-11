@@ -1,90 +1,189 @@
 import Item from "@/src/db/model/Item";
-import { syncService } from "@/src/db/sync/sync.service";
 import { useAuthStore } from "@/src/features/auth/store/auth.store";
+import { MotivationalBanner } from "@/src/features/items/components/atoms/MotivationalBanner";
 import { EmptyStateIllustration } from "@/src/features/items/components/molecules/EmptyStateIllustration";
+import { WeeklyTrendChart } from "@/src/features/items/components/molecules/WeeklyTrendChart";
+import { PantryBalanceMeter } from "@/src/features/items/components/organisms/PantryBalanceMeter";
+import { getDayIndex, getWeekBounds } from "@/src/features/items/utils";
 import { Database, Q } from "@nozbe/watermelondb";
 import { useDatabase, withObservables } from "@nozbe/watermelondb/react";
-import React from "react";
-import { Alert, Button, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import React, { useCallback, useMemo, useState } from "react";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 interface HomeContentProps {
-    items: Item[];
+  items: Item[];
 }
 
 const HomeContent = ({ items }: HomeContentProps) => {
-    const logout = useAuthStore((s) => s.logout);
-    const user = useAuthStore((s) => s.user);
+  const user = useAuthStore((s) => s.user);
+  const [focusTick, setFocusTick] = useState(0);
+  useFocusEffect(
+    useCallback(() => {
+      setFocusTick((t) => t + 1);
+    }, []),
+  );
 
-    if (items.length === 0) {
-        return (
-            <View style={styles.container}>
-                <ScrollView
-                    contentContainerStyle={{ paddingBottom: 48, flexGrow: 1 }}
-                    showsVerticalScrollIndicator={false}
-                >
-                    <EmptyStateIllustration />
-                </ScrollView>
-            </View>
-        );
+  const insights = useMemo(() => {
+    const now = Date.now();
+    const thisWeek = getWeekBounds(0);
+    const lastWeek = getWeekBounds(1);
+
+    let consumedTotal = 0;
+    let expiredTotal = 0;
+    let consumedThisWeek = 0;
+    let consumedLastWeek = 0;
+    let expiredThisWeek = 0;
+    let expiredLastWeek = 0;
+
+    const dailyConsumed = [0, 0, 0, 0, 0, 0, 0];
+    const dailyExpired = [0, 0, 0, 0, 0, 0, 0];
+
+    for (const item of items) {
+      if (item.isConsumed) {
+        const t = item.consumedAt ? item.consumedAt.getTime() : 0;
+        const expiry = item.expiresAt ? item.expiresAt.getTime() : Infinity;
+        if (t < expiry) {
+          consumedTotal++;
+          if (t >= thisWeek.start && t < thisWeek.end) {
+            consumedThisWeek++;
+            const dayIdx = getDayIndex(t, thisWeek.start);
+            if (dayIdx >= 0 && dayIdx < 7) dailyConsumed[dayIdx]++;
+          } else if (t >= lastWeek.start && t < lastWeek.end) {
+            consumedLastWeek++;
+          }
+        }
+      } else if (item.expiresAt && item.expiresAt.getTime() < now) {
+        expiredTotal++;
+        const expT = item.expiresAt.getTime();
+        if (expT >= thisWeek.start && expT < thisWeek.end) {
+          expiredThisWeek++;
+          const dayIdx = getDayIndex(expT, thisWeek.start);
+          if (dayIdx >= 0 && dayIdx < 7) dailyExpired[dayIdx]++;
+        } else if (expT >= lastWeek.start && expT < lastWeek.end) {
+          expiredLastWeek++;
+        }
+      }
     }
 
+    const consumedDelta = consumedThisWeek - consumedLastWeek;
+    const expiredDelta = expiredThisWeek - expiredLastWeek;
+
+    return {
+      consumedTotal,
+      expiredTotal,
+      consumedDelta,
+      expiredDelta,
+      dailyConsumed,
+      dailyExpired,
+    };
+  }, [items, focusTick]);
+
+  if (items.length === 0) {
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Dashboard</Text>
-
-            <View style={styles.userInfo}>
-                <Text>Welcome, {user?.name} ({user?.email})</Text>
-            </View>
-
-            <Button title="Logout" onPress={logout} color="red" />
-
-            <View style={styles.actionsSection}>
-                <Button title="Sync Now" onPress={async () => {
-                    try {
-                        await syncService.sync();
-                        Alert.alert("Success", "Sync completed!");
-                    } catch (err: any) {
-                        Alert.alert("Sync Error", err.message);
-                    }
-                }} color="green" />
-            </View>
-        </View>
+      <View style={styles.container}>
+        <ScrollView
+          contentContainerStyle={{ paddingBottom: 48, flexGrow: 1 }}
+          showsVerticalScrollIndicator={false}
+        >
+          <EmptyStateIllustration />
+        </ScrollView>
+      </View>
     );
+  }
+
+  return (
+    <View style={styles.container}>
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 80 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <PantryBalanceMeter
+          consumedCount={insights.consumedTotal}
+          expiredCount={insights.expiredTotal}
+        />
+
+        <MotivationalBanner />
+
+        <WeeklyTrendChart
+          dailyConsumed={insights.dailyConsumed}
+          dailyExpired={insights.dailyExpired}
+        />
+      </ScrollView>
+    </View>
+  );
 };
 
 const enhance = withObservables(
-    ["userId"],
-    ({ database, userId }: { database: Database; userId: string }) => ({
-        items: database.get<Item>("items").query(Q.where("user_id", userId)).observe(),
-    })
+  ["userId"],
+  ({ database, userId }: { database: Database; userId: string }) => ({
+    items: database
+      .get<Item>("items")
+      .query(Q.where("user_id", userId))
+      .observe(),
+  }),
 );
 
 const EnhancedHomeContent = enhance(HomeContent);
 
 export default function Index() {
-    const user = useAuthStore((s) => s.user);
-    const database = useDatabase();
+  const user = useAuthStore((s) => s.user);
+  const database = useDatabase();
 
-    if (!user) {
-        return (
-            <View style={styles.container}>
-                <Text style={styles.emptyText}>Please log in to continue.</Text>
-            </View>
-        );
-    }
+  if (!user) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.emptyText}>Please log in to continue.</Text>
+      </View>
+    );
+  }
 
-    return <EnhancedHomeContent database={database} userId={user.id} />;
+  return <EnhancedHomeContent database={database} userId={user.id} />;
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#f5f5f3",
-        padding: 16,
-        paddingTop: 100,
-    },
-    title: { fontWeight: "bold", fontSize: 20, padding: 50, paddingBottom: 0 },
-    userInfo: { marginVertical: 20, paddingHorizontal: 50 },
-    actionsSection: { marginTop: 30, paddingHorizontal: 50 },
-    emptyText: { color: "#999", fontSize: 14 },
+  container: {
+    flex: 1,
+    backgroundColor: "#f5f5f3",
+    paddingHorizontal: 16,
+    paddingTop: 60,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    paddingHorizontal: 4,
+    marginBottom: 16,
+  },
+  greeting: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#6B8F5B",
+    marginBottom: 2,
+    letterSpacing: 0.2,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "800",
+    color: "#2C2C2C",
+    letterSpacing: -0.5,
+  },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#EDE6D9",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 2,
+  },
+  avatarText: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#7A746C",
+  },
+  emptyText: {
+    color: "#999",
+    fontSize: 14,
+  },
 });
