@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   bar: {
-    width: 18,
+    width: 20,
     borderRadius: 9,
     minHeight: 4,
   },

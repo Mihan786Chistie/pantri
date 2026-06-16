@@ -1,5 +1,5 @@
 export const DAY_LABELS = ["M", "T", "W", "T", "F", "S", "S"];
-export const BAR_MAX_HEIGHT = 10;
+export const BAR_MAX_HEIGHT = 7;
 
 export interface WeeklyTrendChartProps {
   dailyConsumed: number[];
