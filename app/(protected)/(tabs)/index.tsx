@@ -1,14 +1,16 @@
 import Item from "@/src/db/model/Item";
+import { autoCleanupItems } from "@/src/features/items/services/item.service";
 import { useAuthStore } from "@/src/features/auth/store/auth.store";
 import { MotivationalBanner } from "@/src/features/items/components/atoms/MotivationalBanner";
 import { EmptyStateIllustration } from "@/src/features/items/components/molecules/EmptyStateIllustration";
 import { WeeklyTrendChart } from "@/src/features/items/components/molecules/WeeklyTrendChart";
+import { ExpiringItemsList } from "@/src/features/items/components/organisms/ExpiringItemsList";
 import { PantryBalanceMeter } from "@/src/features/items/components/organisms/PantryBalanceMeter";
 import { getDayIndex, getWeekBounds } from "@/src/features/items/utils";
 import { Database, Q } from "@nozbe/watermelondb";
 import { useDatabase, withObservables } from "@nozbe/watermelondb/react";
 import { useFocusEffect } from "@react-navigation/native";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 interface HomeContentProps {
@@ -23,6 +25,12 @@ const HomeContent = ({ items }: HomeContentProps) => {
       setFocusTick((t) => t + 1);
     }, []),
   );
+
+  useEffect(() => {
+    if (items.length > 0) {
+      autoCleanupItems(items);
+    }
+  }, [items]);
 
   const insights = useMemo(() => {
     const now = Date.now();
@@ -109,6 +117,8 @@ const HomeContent = ({ items }: HomeContentProps) => {
           dailyConsumed={insights.dailyConsumed}
           dailyExpired={insights.dailyExpired}
         />
+
+        <ExpiringItemsList items={items} />
       </ScrollView>
     </View>
   );
@@ -120,7 +130,7 @@ const enhance = withObservables(
     items: database
       .get<Item>("items")
       .query(Q.where("user_id", userId))
-      .observe(),
+      .observeWithColumns(["is_consumed", "consumed_at", "expires_at"]),
   }),
 );
 
@@ -145,8 +155,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f5f5f3",
-    paddingHorizontal: 16,
-    paddingTop: 60,
+    padding: 16,
+    paddingTop: 100,
   },
   header: {
     flexDirection: "row",

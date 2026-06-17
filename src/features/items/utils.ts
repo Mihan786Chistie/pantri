@@ -280,3 +280,9 @@ export function getDayIndex(timestamp: number, weekStart: number): number {
   const diff = timestamp - weekStart;
   return Math.floor(diff / (24 * 60 * 60 * 1000));
 }
+
+export function getRandomCelebrateEmoji() {
+  const emojis = ["🚀", "🎉", "🥳", "✨"];
+  const randomIndex = Math.floor(Math.random() * emojis.length);
+  return emojis[randomIndex];
+}

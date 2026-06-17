@@ -44,6 +44,40 @@ export async function deleteItem(item: Item) {
     });
 }
 
+export async function autoCleanupItems(items: Item[]) {
+    const oneDayMs = 24 * 60 * 60 * 1000;
+    const now = Date.now();
+
+    for (const item of items) {
+        let shouldDelete = false;
+
+        if (item.expiresAt) {
+            const daysLeft = Math.ceil(
+                (item.expiresAt.getTime() - now) / (1000 * 60 * 60 * 24)
+            );
+            if (daysLeft < 0) {
+                shouldDelete = true;
+            }
+        }
+
+        const consumedAt = (item as any).consumedAt;
+        if (item.isConsumed && consumedAt) {
+            if (now - consumedAt.getTime() > oneDayMs) {
+                shouldDelete = true;
+            }
+        }
+
+        if (shouldDelete) {
+            try {
+                await deleteItem(item);
+                console.log(`[AutoCleanup] Automatically deleted expired/consumed item: ${item.name}`);
+            } catch (e) {
+                console.warn(`[AutoCleanup] Failed to delete item: ${item.name}`, e);
+            }
+        }
+    }
+}
+
 export async function getCategories(): Promise<string[]> {
     const userId = useAuthStore.getState().user?.id;
     if (!userId) return [];

@@ -28,8 +28,8 @@ export const CategoryCard = ({ section }: CategoryCardProps) => {
 const styles = StyleSheet.create({
     categoryCard: {
         backgroundColor: "#ffffff",
-        marginHorizontal: 12,
-        marginVertical: 8,
+        marginHorizontal: 4,
+        marginVertical: 6,
         borderRadius: 20,
         borderWidth: 1,
         borderColor: "#f0f0ee",
