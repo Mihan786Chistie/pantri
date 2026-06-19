@@ -1,17 +1,17 @@
+import { Text } from "@/src/components/Text";
 import Item from "@/src/db/model/Item";
-import { autoCleanupItems } from "@/src/features/items/services/item.service";
 import { useAuthStore } from "@/src/features/auth/store/auth.store";
-import { MotivationalBanner } from "@/src/features/items/components/atoms/MotivationalBanner";
 import { EmptyStateIllustration } from "@/src/features/items/components/molecules/EmptyStateIllustration";
 import { WeeklyTrendChart } from "@/src/features/items/components/molecules/WeeklyTrendChart";
 import { ExpiringItemsList } from "@/src/features/items/components/organisms/ExpiringItemsList";
 import { PantryBalanceMeter } from "@/src/features/items/components/organisms/PantryBalanceMeter";
+import { autoCleanupItems } from "@/src/features/items/services/item.service";
 import { getDayIndex, getWeekBounds } from "@/src/features/items/utils";
 import { Database, Q } from "@nozbe/watermelondb";
 import { useDatabase, withObservables } from "@nozbe/watermelondb/react";
 import { useFocusEffect } from "@react-navigation/native";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 
 interface HomeContentProps {
   items: Item[];
@@ -110,8 +110,6 @@ const HomeContent = ({ items }: HomeContentProps) => {
           consumedCount={insights.consumedTotal}
           expiredCount={insights.expiredTotal}
         />
-
-        <MotivationalBanner />
 
         <WeeklyTrendChart
           dailyConsumed={insights.dailyConsumed}

@@ -1,6 +1,7 @@
 import { Image } from "expo-image";
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Text } from "@/src/components/Text";
+import { StyleSheet, View } from "react-native";
 
 export const EmptyStateIllustration = () => {
   return (

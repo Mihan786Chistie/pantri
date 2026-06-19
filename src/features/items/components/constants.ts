@@ -1,3 +1,5 @@
+import { FilterType } from "../types";
+
 export const DAY_LABELS = ["M", "T", "W", "T", "F", "S", "S"];
 export const BAR_MAX_HEIGHT = 7;
 
@@ -21,3 +23,8 @@ export interface PantryBalanceMeterProps {
   consumedCount: number;
   expiredCount: number;
 }
+
+export const filters: FilterType[] = ["all"];
+export const filterLabels: Record<FilterType, string> = {
+  all: "All items",
+};

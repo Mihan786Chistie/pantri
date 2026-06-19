@@ -1,6 +1,7 @@
+import { Text } from "@/src/components/Text";
 import { Colors } from "@/src/constants/colors";
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import {
   BAR_MAX_HEIGHT,
   DAY_LABELS,
@@ -11,9 +12,6 @@ export function WeeklyTrendChart({
   dailyConsumed,
   dailyExpired,
 }: WeeklyTrendChartProps) {
-  const allValues = dailyConsumed.map((c, i) => c + dailyExpired[i]);
-  const maxVal = Math.max(...allValues, 1);
-
   return (
     <View style={styles.card}>
       <View style={styles.header}>
@@ -25,7 +23,7 @@ export function WeeklyTrendChart({
           const consumed = dailyConsumed[i] || 0;
           const expired = dailyExpired[i] || 0;
           const total = consumed + expired;
-          const barH = Math.max((total / maxVal) * BAR_MAX_HEIGHT, 4);
+          const barH = total > 0 ? BAR_MAX_HEIGHT : 4;
           const barColor =
             total === 0
               ? Colors.unselected
@@ -59,18 +57,15 @@ export function WeeklyTrendChart({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: Colors.background,
     borderRadius: 20,
     padding: 20,
     paddingBottom: 16,
     marginHorizontal: 4,
     marginVertical: 6,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 3,
     rowGap: 20,
+    borderColor: Colors.default,
+    borderWidth: 1.2,
   },
   header: {
     flexDirection: "row",
@@ -79,8 +74,8 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
   title: {
-    fontSize: 16,
-    fontWeight: "700",
+    fontSize: 18,
+    fontWeight: "500",
     color: "#2C2C2C",
     letterSpacing: -0.2,
   },

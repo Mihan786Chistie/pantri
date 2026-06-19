@@ -1,9 +1,11 @@
+import { Text } from "@/src/components/Text";
+import { Colors } from "@/src/constants/colors";
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { MotivationalBannerProps } from "../constants";
 
 export function MotivationalBanner({
-  message = "Let's reduce waste together",
+  message = "Let's reduce waste together 💚",
 }: MotivationalBannerProps) {
   return (
     <View style={styles.pill}>
@@ -19,14 +21,14 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 28,
     borderWidth: 1.2,
-    borderColor: "#E0DBD3",
-    backgroundColor: "#FEFEFE",
+    borderColor: Colors.default,
+    backgroundColor: Colors.background,
     marginVertical: 8,
   },
   text: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#5C564E",
+    fontSize: 20,
+    fontWeight: "400",
+    color: Colors.green,
     letterSpacing: 0.1,
   },
 });

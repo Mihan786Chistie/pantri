@@ -1,7 +1,9 @@
+import { Text } from "@/src/components/Text";
+import { Colors } from "@/src/constants/colors";
 import Item from "@/src/db/model/Item";
 import { EnhancedItemRow } from "@/src/features/items/components/organisms/ItemRow";
 import React, { useMemo } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { checkExpiry, getRandomCelebrateEmoji } from "../../utils";
 
 interface ExpiringItemsListProps {
@@ -50,7 +52,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "500",
     color: "#2C2C2C",
     paddingTop: 16,
     paddingHorizontal: 16,
@@ -59,16 +61,10 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     backgroundColor: "#fff",
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    borderWidth: 1.2,
+    borderColor: Colors.default,
   },
   emptyContent: {
     alignItems: "center",

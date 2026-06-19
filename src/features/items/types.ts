@@ -1,30 +1,30 @@
 import Item from "@/src/db/model/Item";
 
 export type ItemType = {
-    name: string;
-    category?: string;
-    expiresAt: Date;
-    isConsumed: boolean;
-    emoji?: string;
-    consumedAt?: Date;
-}
+  name: string;
+  category?: string;
+  expiresAt: Date;
+  isConsumed: boolean;
+  emoji?: string;
+  consumedAt?: Date;
+};
 
 export type ItemUpdateType = {
-    name?: string;
-    category?: string;
-    expiresAt?: Date;
-    isConsumed?: boolean;
-    emoji?: string;
-    consumedAt?: Date;
-}
+  name?: string;
+  category?: string;
+  expiresAt?: Date;
+  isConsumed?: boolean;
+  emoji?: string;
+  consumedAt?: Date;
+};
 
-export type FilterType = "all" | "expiring";
+export type FilterType = "all";
 
 export interface ItemRowProps {
-    item: Item;
+  item: Item;
 }
 
 export interface Section {
-    title: string;
-    data: Item[];
+  title: string;
+  data: Item[];
 }
