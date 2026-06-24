@@ -1,6 +1,6 @@
+import { Text } from "@/src/components/Text";
 import { Image } from "expo-image";
 import React from "react";
-import { Text } from "@/src/components/Text";
 import { StyleSheet, View } from "react-native";
 
 export const EmptyStateIllustration = () => {
@@ -39,21 +39,20 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 32,
-    fontWeight: "800",
+    fontSize: 34,
+    fontWeight: "600",
     color: "#374151",
-    letterSpacing: -0.8,
+    letterSpacing: -2,
     marginBottom: 10,
     textAlign: "center",
   },
 
   subtitle: {
-    fontSize: 22,
+    fontSize: 30,
     fontWeight: "500",
     color: "#6b7280",
     textAlign: "center",
-    lineHeight: 24,
-    maxWidth: 240,
+    letterSpacing: -2,
   },
 
   image: {

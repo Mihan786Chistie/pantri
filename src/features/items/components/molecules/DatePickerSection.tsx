@@ -1,3 +1,4 @@
+import { Text } from "@/src/components/Text";
 import { Colors } from "@/src/constants/colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -8,7 +9,6 @@ import {
   Platform,
   Pressable,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -234,14 +234,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   dateTitle: {
-    fontSize: 34,
-    fontWeight: "500",
+    fontSize: 35,
+    fontWeight: "600",
     color: "#1a1a1b",
-    letterSpacing: -0.8,
+    letterSpacing: -0.6,
   },
   relativeSub: {
-    fontSize: 15,
-    fontWeight: "500",
+    fontSize: 17,
+    fontWeight: "600",
     color: Colors.green,
     marginTop: 4,
   },
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
   },
   presetText: {
     fontSize: 13,
-    fontWeight: "500",
+    fontWeight: "600",
   },
   presetTextSelected: {
     color: Colors.background,

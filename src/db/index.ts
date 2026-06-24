@@ -9,6 +9,7 @@ import AiNotification from './model/AiNotification'
 import Item from './model/Item'
 import MealTime from './model/MealTime'
 import Category from './model/Category'
+import WeeklyTrend from './model/WeeklyTrend'
 
 // First, create the adapter to the underlying database:
 const adapter = new SQLiteAdapter({
@@ -29,6 +30,7 @@ export const database = new Database({
         Item,
         MealTime,
         AiNotification,
-        Category
+        Category,
+        WeeklyTrend
     ],
 })

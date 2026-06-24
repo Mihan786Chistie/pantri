@@ -1,5 +1,6 @@
 import { Colors } from "@/src/constants/colors";
 import Item from "@/src/db/model/Item";
+import WeeklyTrend from "@/src/db/model/WeeklyTrend";
 import { Section } from "@/src/features/items/types";
 import data from "@emoji-mart/data";
 import { init, SearchIndex } from "emoji-mart";
@@ -281,8 +282,49 @@ export function getDayIndex(timestamp: number, weekStart: number): number {
   return Math.floor(diff / (24 * 60 * 60 * 1000));
 }
 
-export function getRandomCelebrateEmoji() {
-  const emojis = ["🚀", "🎉", "🥳", "✨"];
+export function getRandomEmoji(emojis: string[]) {
   const randomIndex = Math.floor(Math.random() * emojis.length);
   return emojis[randomIndex];
+}
+
+export function computeWeeklyTrendData(
+  items: Item[],
+  trends: WeeklyTrend[],
+  weekStart: number,
+  weekEnd: number,
+) {
+  const dailyConsumed = [0, 0, 0, 0, 0, 0, 0];
+  const dailyExpired = [0, 0, 0, 0, 0, 0, 0];
+
+  for (const item of items) {
+    if (item.isConsumed) {
+      const t = (item as Item).consumedAt
+        ? (item as Item).consumedAt.getTime()
+        : 0;
+      const expiry = item.expiresAt ? item.expiresAt.getTime() : Infinity;
+      if (t < expiry && t >= weekStart && t < weekEnd) {
+        const dayIdx = getDayIndex(t, weekStart);
+        if (dayIdx >= 0 && dayIdx < 7) dailyConsumed[dayIdx]++;
+      }
+    } else if (item.expiresAt && item.expiresAt.getTime() < Date.now()) {
+      const expT = item.expiresAt.getTime();
+      if (expT >= weekStart && expT < weekEnd) {
+        const dayIdx = getDayIndex(expT, weekStart);
+        if (dayIdx >= 0 && dayIdx < 7) dailyExpired[dayIdx]++;
+      }
+    }
+  }
+
+  for (const trend of trends) {
+    const t = trend.date.getTime();
+    if (t >= weekStart && t < weekEnd) {
+      const dayIdx = getDayIndex(t, weekStart);
+      if (dayIdx >= 0 && dayIdx < 7) {
+        if (trend.type === "consumed") dailyConsumed[dayIdx]++;
+        else if (trend.type === "expired") dailyExpired[dayIdx]++;
+      }
+    }
+  }
+
+  return { dailyConsumed, dailyExpired };
 }

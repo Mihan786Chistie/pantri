@@ -1,3 +1,4 @@
+import WeeklyTrend from "@/src/db/model/WeeklyTrend";
 import { useAuthStore } from "@/src/features/auth/store/auth.store";
 import { Q } from "@nozbe/watermelondb";
 import uuid from "react-native-uuid";
@@ -44,39 +45,90 @@ export async function deleteItem(item: Item) {
   });
 }
 
+let isCleanupRunning = false;
+
 export async function autoCleanupItems(items: Item[]) {
-  const oneDayMs = 24 * 60 * 60 * 1000;
-  const now = Date.now();
+  if (isCleanupRunning) return;
+  isCleanupRunning = true;
 
-  for (const item of items) {
-    let shouldDelete = false;
+  try {
+    const oneDayMs = 24 * 60 * 60 * 1000;
+    const now = Date.now();
 
-    if (item.expiresAt) {
-      const daysLeft = Math.ceil(
-        (item.expiresAt.getTime() - now) / (1000 * 60 * 60 * 24),
-      );
-      if (daysLeft < 0) {
-        shouldDelete = true;
-      }
-    }
+    for (const item of items) {
+      let shouldDelete = false;
+      let archiveType: "consumed" | "expired" | null = null;
+      let archiveDate: number | null = null;
 
-    const consumedAt = (item as any).consumedAt;
-    if (item.isConsumed && consumedAt) {
-      if (now - consumedAt.getTime() > oneDayMs) {
-        shouldDelete = true;
-      }
-    }
-
-    if (shouldDelete) {
-      try {
-        await deleteItem(item);
-        console.log(
-          `[AutoCleanup] Automatically deleted expired/consumed item: ${item.name}`,
+      if (item.expiresAt) {
+        const daysLeft = Math.ceil(
+          (item.expiresAt.getTime() - now) / (1000 * 60 * 60 * 24),
         );
-      } catch (e) {
-        console.warn(`[AutoCleanup] Failed to delete item: ${item.name}`, e);
+        if (daysLeft < 0) {
+          shouldDelete = true;
+          archiveType = "expired";
+          archiveDate = item.expiresAt.getTime();
+        }
+      }
+
+      const consumedAt = (item as any).consumedAt;
+      if (item.isConsumed && consumedAt) {
+        if (now - consumedAt.getTime() > oneDayMs) {
+          shouldDelete = true;
+          archiveType = "consumed";
+          archiveDate = consumedAt.getTime();
+        }
+      }
+
+      if (shouldDelete) {
+        try {
+          await database.write(async () => {
+            if (archiveType && archiveDate) {
+              const existing = await database
+                .get<WeeklyTrend>("weekly_trend")
+                .query(Q.where("item_id", item.id))
+                .fetchCount();
+
+              if (existing === 0) {
+                await database.get<WeeklyTrend>("weekly_trend").create((record) => {
+                  record.userId = item.userId;
+                  record.itemId = item.id;
+                  record.type = archiveType as string;
+                  record.date = new Date(archiveDate as number);
+                });
+              }
+            }
+            await item.markAsDeleted();
+          });
+          console.log(
+            `[AutoCleanup] Automatically deleted expired/consumed item: ${item.name}`,
+          );
+        } catch (e) {
+          console.warn(`[AutoCleanup] Failed to delete item: ${item.name}`, e);
+        }
       }
     }
+
+    try {
+      const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000;
+      const oldTrends = await database
+        .get<WeeklyTrend>("weekly_trend")
+        .query(Q.where("date", Q.lt(sevenDaysAgo)))
+        .fetch();
+
+      if (oldTrends.length > 0) {
+        await database.write(async () => {
+          for (const trend of oldTrends) {
+            await trend.destroyPermanently();
+          }
+        });
+        console.log(`[AutoCleanup] Cleaned up ${oldTrends.length} old trend records`);
+      }
+    } catch (e) {
+      console.warn(`[AutoCleanup] Failed to clean up old trends`, e);
+    }
+  } finally {
+    isCleanupRunning = false;
   }
 }
 

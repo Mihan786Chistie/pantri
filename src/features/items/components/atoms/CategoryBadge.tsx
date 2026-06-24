@@ -1,4 +1,5 @@
 import { Text } from "@/src/components/Text";
+import { Colors } from "@/src/constants/colors";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 
@@ -28,6 +29,6 @@ const styles = StyleSheet.create({
   categoryBadgeText: {
     fontSize: 11,
     fontWeight: "500",
-    color: "#0f761e",
+    color: Colors.primary,
   },
 });

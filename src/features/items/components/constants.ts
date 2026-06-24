@@ -26,5 +26,5 @@ export interface PantryBalanceMeterProps {
 
 export const filters: FilterType[] = ["all"];
 export const filterLabels: Record<FilterType, string> = {
-  all: "All items",
+  all: "All",
 };

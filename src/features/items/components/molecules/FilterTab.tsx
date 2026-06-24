@@ -40,8 +40,10 @@ const styles = StyleSheet.create({
   filterBtnText: {
     fontSize: 13,
     color: "#555",
+    fontWeight: "500",
   },
   filterBtnTextActive: {
     color: "#fff",
+    fontWeight: "500",
   },
 });

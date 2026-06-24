@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
     paddingTop: 100,
   },
   header: {
-    marginHorizontal: 10,
+    marginHorizontal: 4,
     marginBottom: 14,
   },
   headerTitleRow: {
@@ -116,14 +116,14 @@ const styles = StyleSheet.create({
     borderColor: "rgba(15, 118, 30, 0.14)",
   },
   badgeText: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "500",
     color: Colors.primary,
   },
   filterRow: {
     flexDirection: "row",
     gap: 8,
-    paddingHorizontal: 12,
+    paddingHorizontal: 4,
     marginBottom: 8,
   },
   emptyText: {

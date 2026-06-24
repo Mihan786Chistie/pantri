@@ -4,13 +4,17 @@ import Item from "@/src/db/model/Item";
 import { EnhancedItemRow } from "@/src/features/items/components/organisms/ItemRow";
 import React, { useMemo } from "react";
 import { StyleSheet, View } from "react-native";
-import { checkExpiry, getRandomCelebrateEmoji } from "../../utils";
+import { checkExpiry, getRandomEmoji } from "../../utils";
 
 interface ExpiringItemsListProps {
   items: Item[];
+  weeklyTrends?: any;
 }
 
-export const ExpiringItemsList = ({ items }: ExpiringItemsListProps) => {
+export const ExpiringItemsList = ({
+  items,
+  weeklyTrends,
+}: ExpiringItemsListProps) => {
   const expiringItems = useMemo(() => {
     return items
       .filter(
@@ -27,9 +31,19 @@ export const ExpiringItemsList = ({ items }: ExpiringItemsListProps) => {
     <View style={styles.container}>
       <View style={styles.listContainer}>
         <Text style={styles.title}>Expiring Soon</Text>
-        {expiringItems.length === 0 ? (
+        {weeklyTrends.length > 0 && items.length === 0 ? (
           <View style={styles.emptyContent}>
-            <Text style={styles.emptyIcon}>{getRandomCelebrateEmoji()}</Text>
+            <Text style={styles.emptyIcon}>
+              {getRandomEmoji(["🥕", "🌱", "🥬", "🍎", "🛒"])}
+            </Text>
+            <Text style={styles.emptyText}>Nothing on the shelves</Text>
+            <Text style={styles.emptySubtext}>Time to stock up again.</Text>
+          </View>
+        ) : expiringItems.length === 0 ? (
+          <View style={styles.emptyContent}>
+            <Text style={styles.emptyIcon}>
+              {getRandomEmoji(["🚀", "🎉", "🥳", "✨"])}
+            </Text>
             <Text style={styles.emptyText}>All good!</Text>
             <Text style={styles.emptySubtext}>
               No items are close to expiring.
@@ -83,7 +97,8 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   emptySubtext: {
-    fontSize: 14,
+    fontSize: 16,
+    fontWeight: "500",
     color: "#7A746C",
     textAlign: "center",
   },

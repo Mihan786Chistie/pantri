@@ -67,9 +67,9 @@ export function PantryBalanceMeter({
   useEffect(() => {
     const targetDeg = ARC_START + needleTargetBalance * ARC_SWEEP;
     needleAngle.value = withSpring(targetDeg - 270, {
-      damping: 20,
-      stiffness: 100,
-      mass: 1.4,
+      damping: 30,
+      stiffness: 40,
+      mass: 2.5,
     });
   }, [needleTargetBalance, ARC_START, ARC_SWEEP, needleAngle]);
 
@@ -77,8 +77,8 @@ export function PantryBalanceMeter({
     cancelAnimation(wobble);
     wobble.value = withRepeat(
       withSequence(
-        withTiming(0.4, { duration: 2000, easing: Easing.inOut(Easing.sin) }),
-        withTiming(-0.4, { duration: 2000, easing: Easing.inOut(Easing.sin) }),
+        withTiming(0.4, { duration: 3000, easing: Easing.inOut(Easing.sin) }),
+        withTiming(-0.4, { duration: 3000, easing: Easing.inOut(Easing.sin) }),
       ),
       -1,
       false,

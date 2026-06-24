@@ -1,12 +1,16 @@
 import { Text } from "@/src/components/Text";
 import Item from "@/src/db/model/Item";
+import WeeklyTrend from "@/src/db/model/WeeklyTrend";
 import { useAuthStore } from "@/src/features/auth/store/auth.store";
 import { EmptyStateIllustration } from "@/src/features/items/components/molecules/EmptyStateIllustration";
 import { WeeklyTrendChart } from "@/src/features/items/components/molecules/WeeklyTrendChart";
 import { ExpiringItemsList } from "@/src/features/items/components/organisms/ExpiringItemsList";
 import { PantryBalanceMeter } from "@/src/features/items/components/organisms/PantryBalanceMeter";
 import { autoCleanupItems } from "@/src/features/items/services/item.service";
-import { getDayIndex, getWeekBounds } from "@/src/features/items/utils";
+import {
+  computeWeeklyTrendData,
+  getWeekBounds,
+} from "@/src/features/items/utils";
 import { Database, Q } from "@nozbe/watermelondb";
 import { useDatabase, withObservables } from "@nozbe/watermelondb/react";
 import { useFocusEffect } from "@react-navigation/native";
@@ -15,9 +19,10 @@ import { ScrollView, StyleSheet, View } from "react-native";
 
 interface HomeContentProps {
   items: Item[];
+  weeklyTrends: WeeklyTrend[];
 }
 
-const HomeContent = ({ items }: HomeContentProps) => {
+const HomeContent = ({ items, weeklyTrends }: HomeContentProps) => {
   const user = useAuthStore((s) => s.user);
   const [focusTick, setFocusTick] = useState(0);
   useFocusEffect(
@@ -35,59 +40,36 @@ const HomeContent = ({ items }: HomeContentProps) => {
   const insights = useMemo(() => {
     const now = Date.now();
     const thisWeek = getWeekBounds(0);
-    const lastWeek = getWeekBounds(1);
 
     let consumedTotal = 0;
     let expiredTotal = 0;
-    let consumedThisWeek = 0;
-    let consumedLastWeek = 0;
-    let expiredThisWeek = 0;
-    let expiredLastWeek = 0;
-
-    const dailyConsumed = [0, 0, 0, 0, 0, 0, 0];
-    const dailyExpired = [0, 0, 0, 0, 0, 0, 0];
 
     for (const item of items) {
       if (item.isConsumed) {
         const t = item.consumedAt ? item.consumedAt.getTime() : 0;
         const expiry = item.expiresAt ? item.expiresAt.getTime() : Infinity;
-        if (t < expiry) {
-          consumedTotal++;
-          if (t >= thisWeek.start && t < thisWeek.end) {
-            consumedThisWeek++;
-            const dayIdx = getDayIndex(t, thisWeek.start);
-            if (dayIdx >= 0 && dayIdx < 7) dailyConsumed[dayIdx]++;
-          } else if (t >= lastWeek.start && t < lastWeek.end) {
-            consumedLastWeek++;
-          }
-        }
+        if (t < expiry) consumedTotal++;
       } else if (item.expiresAt && item.expiresAt.getTime() < now) {
         expiredTotal++;
-        const expT = item.expiresAt.getTime();
-        if (expT >= thisWeek.start && expT < thisWeek.end) {
-          expiredThisWeek++;
-          const dayIdx = getDayIndex(expT, thisWeek.start);
-          if (dayIdx >= 0 && dayIdx < 7) dailyExpired[dayIdx]++;
-        } else if (expT >= lastWeek.start && expT < lastWeek.end) {
-          expiredLastWeek++;
-        }
       }
     }
 
-    const consumedDelta = consumedThisWeek - consumedLastWeek;
-    const expiredDelta = expiredThisWeek - expiredLastWeek;
+    const { dailyConsumed, dailyExpired } = computeWeeklyTrendData(
+      items,
+      weeklyTrends,
+      thisWeek.start,
+      thisWeek.end,
+    );
 
     return {
       consumedTotal,
       expiredTotal,
-      consumedDelta,
-      expiredDelta,
       dailyConsumed,
       dailyExpired,
     };
-  }, [items, focusTick]);
+  }, [items, weeklyTrends, focusTick]);
 
-  if (items.length === 0) {
+  if (items.length === 0 && weeklyTrends.length === 0) {
     return (
       <View style={styles.container}>
         <ScrollView
@@ -116,7 +98,7 @@ const HomeContent = ({ items }: HomeContentProps) => {
           dailyExpired={insights.dailyExpired}
         />
 
-        <ExpiringItemsList items={items} />
+        <ExpiringItemsList items={items} weeklyTrends={weeklyTrends} />
       </ScrollView>
     </View>
   );
@@ -124,12 +106,23 @@ const HomeContent = ({ items }: HomeContentProps) => {
 
 const enhance = withObservables(
   ["userId"],
-  ({ database, userId }: { database: Database; userId: string }) => ({
-    items: database
-      .get<Item>("items")
-      .query(Q.where("user_id", userId))
-      .observeWithColumns(["is_consumed", "consumed_at", "expires_at"]),
-  }),
+  ({ database, userId }: { database: Database; userId: string }) => {
+    const thisWeek = getWeekBounds(0);
+    return {
+      items: database
+        .get<Item>("items")
+        .query(Q.where("user_id", userId))
+        .observeWithColumns(["is_consumed", "consumed_at", "expires_at"]),
+      weeklyTrends: database
+        .get<WeeklyTrend>("weekly_trend")
+        .query(
+          Q.where("user_id", userId),
+          Q.where("date", Q.gte(thisWeek.start)),
+          Q.where("date", Q.lt(thisWeek.end)),
+        )
+        .observe(),
+    };
+  },
 );
 
 const EnhancedHomeContent = enhance(HomeContent);
