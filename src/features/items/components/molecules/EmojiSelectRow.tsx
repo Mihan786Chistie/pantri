@@ -1,6 +1,7 @@
 import { Colors } from "@/src/constants/colors";
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Text } from "@/src/components/Text";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 interface EmojiSelectRowProps {

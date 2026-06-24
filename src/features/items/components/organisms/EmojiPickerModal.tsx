@@ -1,7 +1,8 @@
 import { POPULAR_FOOD_EMOJIS } from "@/src/features/items/utils";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import React from "react";
-import { FlatList, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Text } from "@/src/components/Text";
+import { FlatList, Modal, Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
 
 interface EmojiPickerModalProps {
     isVisible: boolean;

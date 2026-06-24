@@ -5,6 +5,7 @@ import { DatabaseProvider } from '@nozbe/watermelondb/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { Stack } from 'expo-router';
+import { useFonts, Poppins_100Thin, Poppins_200ExtraLight, Poppins_300Light, Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold, Poppins_800ExtraBold, Poppins_900Black } from '@expo-google-fonts/poppins';
 import * as SplashScreen from 'expo-splash-screen';
 import React, { useEffect } from 'react';
 import { View } from 'react-native';
@@ -18,17 +19,21 @@ export default function RootLayout() {
     const isHydrated = useAuthStore((s) => s.isHydrated)
     const accessToken = useAuthStore((s) => s.accessToken);
 
+    const [fontsLoaded] = useFonts({
+        Poppins_100Thin, Poppins_200ExtraLight, Poppins_300Light, Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold, Poppins_800ExtraBold, Poppins_900Black
+    });
+
     useEffect(() => {
         hydrate()
     }, [])
 
     useEffect(() => {
-        if (isHydrated) {
+        if (isHydrated && fontsLoaded) {
             SplashScreen.hideAsync();
         }
-    }, [isHydrated]);
+    }, [isHydrated, fontsLoaded]);
 
-    if (!isHydrated) return (
+    if (!isHydrated || !fontsLoaded) return (
         <View style={{ flex: 1, backgroundColor: '#ffffffff', justifyContent: 'center', alignItems: 'center' }}>
             <Image
                 source={require('../assets/images/router-icon.png')}
