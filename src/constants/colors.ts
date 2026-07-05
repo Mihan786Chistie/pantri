@@ -14,4 +14,5 @@ export const Colors = {
   red: "#E24B4A",
   lightRed: "#F7C1C1",
   lightLightRed: "#FBE9E3",
+  complimentary: "#ce2029",
 };

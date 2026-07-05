@@ -96,6 +96,7 @@ interface AddButtonProps {
 export const AddButton = ({
   iconName = "add-outline",
   onPress,
+  color = Colors.primary,
   style,
   isFloating = true,
   disabled = false,
@@ -139,7 +140,9 @@ export const AddButton = ({
       style={[isFloating ? styles.container : styles.inlineContainer, style]}
       disabled={disabled}
     >
-      <Animated.View style={[styles.button, animatedStyle]}>
+      <Animated.View
+        style={[styles.button, animatedStyle, { backgroundColor: color }]}
+      >
         {iconName === "add-outline" ? (
           <CustomPlusIcon color="#fff" size={32} />
         ) : (
@@ -168,7 +171,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   button: {
-    backgroundColor: Colors.primary,
     borderRadius: 20,
     width: 56,
     height: 56,

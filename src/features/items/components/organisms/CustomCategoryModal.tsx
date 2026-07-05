@@ -146,8 +146,8 @@ const styles = StyleSheet.create({
     borderBottomColor: "#f0f0ee",
   },
   modalTitle: {
-    fontSize: 17,
-    fontWeight: "500",
+    fontSize: 18,
+    fontWeight: "600",
     color: "#1a1a1a",
     letterSpacing: -0.4,
   },

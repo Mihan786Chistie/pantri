@@ -52,7 +52,7 @@ const enhance = withObservables(
     items: database
       .get<Item>("items")
       .query(Q.where("user_id", userId))
-      .observe(),
+      .observeWithColumns(["category", "name", "is_consumed", "expires_at", "emoji"]),
   }),
 );
 

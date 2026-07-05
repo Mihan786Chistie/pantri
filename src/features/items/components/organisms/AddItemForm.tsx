@@ -10,11 +10,13 @@ import {
   createItem,
   deleteCategory,
   getCategories,
+  getItemsByCategory,
 } from "../../services/item.service";
 import { findFoodEmoji } from "../../utils";
 import { CategoryTagRow } from "../molecules/CategoryTagRow";
 import { DatePickerSection } from "../molecules/DatePickerSection";
 import { CustomCategoryModal } from "./CustomCategoryModal";
+import { DeleteCategoryModal } from "./DeleteCategoryModal";
 
 interface AddItemFormProps {
   onSuccess: () => void;
@@ -33,6 +35,9 @@ export const AddItemForm = ({ onSuccess }: AddItemFormProps) => {
 
   const [categoriesList, setCategoriesList] = useState<string[]>([]);
   const [isCategoryModalVisible, setIsCategoryModalVisible] = useState(false);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
+  const [affectedItems, setAffectedItems] = useState<any[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -71,6 +76,21 @@ export const AddItemForm = ({ onSuccess }: AddItemFormProps) => {
   }, [name]);
 
   const handleDeleteCategory = async (catName: string) => {
+    try {
+      const items = await getItemsByCategory(catName);
+      if (items && items.length > 0) {
+        setAffectedItems(items);
+        setCategoryToDelete(catName);
+        setIsDeleteModalVisible(true);
+      } else {
+        await executeDeleteCategory(catName);
+      }
+    } catch (e) {
+      console.error("Error checking items for category", e);
+    }
+  };
+
+  const executeDeleteCategory = async (catName: string) => {
     try {
       await deleteCategory(catName);
       if (category === catName) {
@@ -206,6 +226,25 @@ export const AddItemForm = ({ onSuccess }: AddItemFormProps) => {
         isVisible={isCategoryModalVisible}
         onClose={() => setIsCategoryModalVisible(false)}
         onSubmit={handleAddCustomCategory}
+      />
+
+      <DeleteCategoryModal
+        isVisible={isDeleteModalVisible}
+        categoryName={categoryToDelete || ""}
+        items={affectedItems}
+        onClose={() => {
+          setIsDeleteModalVisible(false);
+          setCategoryToDelete(null);
+          setAffectedItems([]);
+        }}
+        onConfirm={() => {
+          if (categoryToDelete) {
+            executeDeleteCategory(categoryToDelete);
+          }
+          setIsDeleteModalVisible(false);
+          setCategoryToDelete(null);
+          setAffectedItems([]);
+        }}
       />
     </View>
   );
