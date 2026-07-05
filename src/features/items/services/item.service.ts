@@ -158,6 +158,20 @@ export async function getCategories(): Promise<string[]> {
   return records.map((r: any) => r.name);
 }
 
+export async function getItemsByCategory(name: string): Promise<any[]> {
+  const userId = useAuthStore.getState().user?.id;
+  if (!userId) throw new Error("Not logged in");
+
+  const trimmed = name.trim();
+
+  const itemRecords = await database
+    .get<any>("items")
+    .query(Q.where("category", trimmed), Q.where("user_id", userId))
+    .fetch();
+
+  return itemRecords;
+}
+
 export async function createCategory(name: string): Promise<string> {
   const userId = useAuthStore.getState().user?.id;
   if (!userId) throw new Error("Not logged in");

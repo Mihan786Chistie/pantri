@@ -57,7 +57,7 @@ export const CategoryTagRow = ({
             >
               {cat}
             </Text>
-            {isSelected && onDelete && (
+            {isSelected && onDelete && cat !== "Other" && (
               <TouchableOpacity
                 onPress={(e) => {
                   e.stopPropagation();

@@ -59,10 +59,10 @@ export const POPULAR_FOOD_EMOJIS = [
   "🥐",
   "🥯",
   "🥞",
-  "🧇",
   "🍕",
   "🍔",
   "🌮",
+  "🍟",
   "🥘",
   "🍲",
   "🍚",
@@ -86,15 +86,14 @@ export const POPULAR_FOOD_EMOJIS = [
 ];
 
 export const DEFAULT_CATEGORIES = [
-  "Dairy",
   "Fruits",
   "Vegetables",
   "Grains",
+  "Dairy",
   "Proteins",
   "Snacks",
   "Drinks",
   "Condiments",
-  "Oils",
   "Other",
 ];
 

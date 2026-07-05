@@ -21,7 +21,7 @@ export const FormField = ({
   return (
     <View style={[styles.field, style]} {...props}>
       <FormLabel>
-        {label}
+        {<Text style={styles.labelText}>{label}</Text>}
         {isRequired && <Text style={styles.asterisk}> *</Text>}
       </FormLabel>
       {children}
@@ -34,13 +34,17 @@ const styles = StyleSheet.create({
   field: {
     marginBottom: 20,
     alignSelf: "stretch",
+  },
+  labelText: {
+    fontSize: 16,
     fontWeight: "500",
+    color: "#1a1a1a",
   },
   asterisk: {
     color: "#E24B4A",
   },
   errorText: {
-    fontSize: 12,
+    fontSize: 16,
     color: "#E24B4A",
     marginTop: 6,
     fontWeight: "500",
